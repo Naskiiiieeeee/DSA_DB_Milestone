@@ -6,13 +6,28 @@ if(isset($_POST['btnSubmit'])){
     $deptName = $_POST['deptName'];
     $deptCode = $_POST['deptCode'];
 
-    $sql = "INSERT INTO `departments` (department_name, department_code) VALUES ('$deptName', '$deptCode')";
-    $result = $con->query($sql);
-
+    $selectDepartment = "SELECT * FROM `departments` WHERE department_name = ? OR department_code = ? ";
+    $result = $con->prepare($selectDepartment);
     if($result){
-        echo "<script>alert('Department Inserted Successfully!');</script>";
+        $result->bind_param("ss", $deptName,  $deptCode);
+        if($result->execute()){
+            $queryResult = $result->get_result();
+            if($queryResult->num_rows > 0){
+                echo "<script>alert('Department Already Exists!');</script>";
+            }else{
+                
+            $sql = "INSERT INTO `departments` (department_name, department_code) VALUES ('$deptName', '$deptCode')";
+            $result = $con->query($sql);
+
+            if($result){
+                echo "<script>alert('Department Inserted Successfully!');</script>";
+            }else{
+                echo "Error: ".$con->error;
+            }
+        }
     }else{
-        echo "Error: ".$con->error;
+    echo "Unavailable to execute";
+    }
     }
 }
 
